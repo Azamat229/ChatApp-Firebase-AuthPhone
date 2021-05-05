@@ -13,6 +13,7 @@
         android:layout_marginBottom="20dp"
         android:background="@color/white"
         android:ems="10"
+        android:textColor="@color/black"
         android:hint="Enter message"
         android:inputType="textPersonName"
         app:layout_constraintBottom_toBottomOf="parent"

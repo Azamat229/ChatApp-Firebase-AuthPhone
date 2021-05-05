@@ -20,6 +20,7 @@
         android:layout_marginRight="32dp"
         android:background="@drawable/rounded_edittext_register_login"
         android:ems="10"
+        android:textColor="@color/black"
         android:hint="Username"
         android:inputType="textPersonName"
         android:paddingLeft="16dp"

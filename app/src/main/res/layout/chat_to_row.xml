@@ -16,15 +16,17 @@
         android:background="@drawable/rounded_button"
         android:maxWidth="250dp"
         android:padding="16dp"
-        android:text="This is my message my dfdsafsjlfjasojflsjflsjflsjfljsdlfjlsdfjl"
-        app:layout_constraintEnd_toStartOf="@+id/imageView2"
+        android:text="This is my message my"
+        app:layout_constraintEnd_toStartOf="@+id/imageView_chat_to"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
-        android:id="@+id/imageView2"
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/imageView_chat_to"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_marginTop="8dp"
+        app:civ_border_width="2dp"
+        app:civ_border_color="@android:color/background_dark"
         android:layout_marginEnd="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
