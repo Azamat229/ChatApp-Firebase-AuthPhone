@@ -15,7 +15,6 @@
         android:ems="10"
         android:hint="Enter message"
         android:inputType="textPersonName"
-        android:text="Name"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/send_botton_chat_log"
         app:layout_constraintHorizontal_bias="0.0"
