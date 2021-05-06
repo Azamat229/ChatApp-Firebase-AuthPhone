@@ -7,12 +7,15 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Button
+import com.example.chatapp_v8.model.ChatMessage
 import com.example.chatapp_v8.model.User
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.*
+import com.xwray.groupie.GroupAdapter
+import com.xwray.groupie.Item
+import com.xwray.groupie.ViewHolder
+import kotlinx.android.synthetic.main.activity_home.*
+import kotlinx.android.synthetic.main.latest_messages_row.view.*
 
 class Home : AppCompatActivity() {
 
@@ -26,29 +29,82 @@ class Home : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
-
+        recyclerView_lastest_messages.adapter = adapter
 
         auth = FirebaseAuth.getInstance()
         var currentUser = auth.currentUser
 
-        //        Reference
-        val logout = findViewById<Button>(R.id.idLogout)
 
         if (currentUser == null) {
             startActivity(Intent(this, RegisterActivity::class.java))
             finish()
         }
 
-        logout.setOnClickListener {
-            auth.signOut()
-            startActivity(Intent(this, RegisterActivity::class.java))
-            finish()
-        }
+        listenForLatestMessages()
         fetchCurrentUser()
         verifyUserIsLoggedIn()
+    }
 
+
+    private fun refreshRecylerViewMessages(){
+        /**непонятная херня связанная с асинхроностью на 9м уроке25 минуте*/
+        adapter.clear()
+        latestMessageMap.values.forEach{
+            adapter.add(LatestMessageRow(it))
+        }
+    }
+
+    val latestMessageMap = HashMap<String, ChatMessage>()
+
+    private fun listenForLatestMessages(){
+        val fromId = FirebaseAuth.getInstance().uid
+        val ref = FirebaseDatabase.getInstance().getReference("/latest-messages/$fromId")
+        ref.addChildEventListener(object: ChildEventListener{
+            override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+                // Когда добавятся новые поля в детский место сработает этот метод
+                val chatMessage = snapshot.getValue(ChatMessage::class.java) ?: return
+                latestMessageMap[snapshot.key!!] = chatMessage
+                refreshRecylerViewMessages()
+
+            }
+
+            override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
+                val chatMessage = snapshot.getValue(ChatMessage::class.java) ?: return
+                adapter.add(LatestMessageRow(chatMessage))
+                latestMessageMap[snapshot.key!!] = chatMessage //
+                refreshRecylerViewMessages()
+                /**непонятная херня связанная с асинхроностью на 9м уроке25 минуте*/
+            }
+
+            override fun onChildRemoved(snapshot: DataSnapshot) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+        })
+    }
+
+    val adapter = GroupAdapter<ViewHolder>()
+
+    class LatestMessageRow(val chatMessage: ChatMessage): Item<ViewHolder>(){
+        override fun bind(viewHolder: ViewHolder, position: Int){
+            viewHolder.itemView.textView_latestMessage_latest_messages.text = chatMessage.text
+
+
+        }
+
+        override fun getLayout(): Int {
+            return R.layout.latest_messages_row
+        }
 
     }
+
 
     private fun fetchCurrentUser() {
         val uid = FirebaseAuth.getInstance().uid
@@ -63,7 +119,6 @@ class Home : AppCompatActivity() {
             override fun onCancelled(error: DatabaseError) {
             }
         })
-
     }
 
     private fun verifyUserIsLoggedIn() {

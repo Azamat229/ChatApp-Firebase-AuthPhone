@@ -15,6 +15,7 @@ import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.ktx.Firebase
 import com.squareup.picasso.Picasso
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.Item
@@ -125,6 +126,12 @@ class ChatLogActivity : AppCompatActivity() {
                 }
 
         toReference.setValue(chatMessage)
+
+        val latestMessagesRef = FirebaseDatabase.getInstance().getReference("/latest-messages/$fromId/$toId")
+        latestMessagesRef.setValue(chatMessage)
+
+        val latestMessagesToRef = FirebaseDatabase.getInstance().getReference("/latest-messages/$toId/$fromId")
+        latestMessagesToRef.setValue(chatMessage)
 
     }
 
