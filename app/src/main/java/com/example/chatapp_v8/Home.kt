@@ -7,10 +7,14 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Button
+import androidx.recyclerview.widget.DividerItemDecoration
+import com.example.chatapp_v8.messages.ChatLogActivity
 import com.example.chatapp_v8.model.ChatMessage
 import com.example.chatapp_v8.model.User
+import com.example.chatapp_v8.view.LatestMessageRow
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import com.squareup.picasso.Picasso
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.Item
 import com.xwray.groupie.ViewHolder
@@ -22,6 +26,7 @@ class Home : AppCompatActivity() {
     companion object {
         var currentUser: User? = null
     }
+    val TAG = "Latest_Message"
 
 
     lateinit var auth: FirebaseAuth
@@ -30,6 +35,19 @@ class Home : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
         recyclerView_lastest_messages.adapter = adapter
+        recyclerView_lastest_messages.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
+
+        // находим на какого пользователя нажал пользователь и выводим его переписку
+
+        adapter.setOnItemClickListener { item, view ->
+            Log.d(TAG, "123")
+            val intent = Intent(this, ChatLogActivity::class.java)
+            // find chat partner
+            val row = item as LatestMessageRow
+            intent.putExtra(NewMessageActivity.USER_KEY, row.chatPartnerUser)
+            startActivity(intent)
+        }
+
 
         auth = FirebaseAuth.getInstance()
         var currentUser = auth.currentUser
@@ -46,20 +64,20 @@ class Home : AppCompatActivity() {
     }
 
 
-    private fun refreshRecylerViewMessages(){
+    private fun refreshRecylerViewMessages() {
         /**непонятная херня связанная с асинхроностью на 9м уроке25 минуте*/
         adapter.clear()
-        latestMessageMap.values.forEach{
+        latestMessageMap.values.forEach {
             adapter.add(LatestMessageRow(it))
         }
     }
 
     val latestMessageMap = HashMap<String, ChatMessage>()
 
-    private fun listenForLatestMessages(){
+    private fun listenForLatestMessages() {
         val fromId = FirebaseAuth.getInstance().uid
         val ref = FirebaseDatabase.getInstance().getReference("/latest-messages/$fromId")
-        ref.addChildEventListener(object: ChildEventListener{
+        ref.addChildEventListener(object : ChildEventListener {
             override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
                 // Когда добавятся новые поля в детский место сработает этот метод
                 val chatMessage = snapshot.getValue(ChatMessage::class.java) ?: return
@@ -92,18 +110,6 @@ class Home : AppCompatActivity() {
 
     val adapter = GroupAdapter<ViewHolder>()
 
-    class LatestMessageRow(val chatMessage: ChatMessage): Item<ViewHolder>(){
-        override fun bind(viewHolder: ViewHolder, position: Int){
-            viewHolder.itemView.textView_latestMessage_latest_messages.text = chatMessage.text
-
-
-        }
-
-        override fun getLayout(): Int {
-            return R.layout.latest_messages_row
-        }
-
-    }
 
 
     private fun fetchCurrentUser() {
